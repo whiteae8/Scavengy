@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scavengy", "Scavengy\Scavengy.csproj", "{ACC70250-2B8A-488A-B0B2-07FD106ADC3D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scavengy.ServiceModel", "Scavengy.ServiceModel\Scavengy.ServiceModel.csproj", "{9476EA99-DA2D-4AC6-A833-E3EE3684F125}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scavengy.ServiceInterface", "Scavengy.ServiceInterface\Scavengy.ServiceInterface.csproj", "{9C87A9C8-5AFC-43F4-A197-8FD73FA18C7E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ACC70250-2B8A-488A-B0B2-07FD106ADC3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACC70250-2B8A-488A-B0B2-07FD106ADC3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACC70250-2B8A-488A-B0B2-07FD106ADC3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACC70250-2B8A-488A-B0B2-07FD106ADC3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9476EA99-DA2D-4AC6-A833-E3EE3684F125}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9476EA99-DA2D-4AC6-A833-E3EE3684F125}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9476EA99-DA2D-4AC6-A833-E3EE3684F125}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9476EA99-DA2D-4AC6-A833-E3EE3684F125}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C87A9C8-5AFC-43F4-A197-8FD73FA18C7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C87A9C8-5AFC-43F4-A197-8FD73FA18C7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C87A9C8-5AFC-43F4-A197-8FD73FA18C7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C87A9C8-5AFC-43F4-A197-8FD73FA18C7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
