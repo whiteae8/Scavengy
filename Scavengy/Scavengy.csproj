@@ -17,6 +17,10 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.10" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="11.0.0-preview.4.26230.115" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+          <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

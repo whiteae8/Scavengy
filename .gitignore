@@ -434,3 +434,6 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 Scavengy/appsettings.Development.json
+*.db
+*.db-shm
+*.db-wal
