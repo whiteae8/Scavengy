@@ -8,6 +8,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Scavengy.ServiceModel\Scavengy.ServiceModel.csproj" />
+        <ProjectReference Include="..\Scavengy\Scavengy.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ServiceStack" Version="8.0.0" />
     </ItemGroup>
     
 </Project>

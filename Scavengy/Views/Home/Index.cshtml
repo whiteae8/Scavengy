@@ -4,3 +4,30 @@
 }
 
 <h1 class="mb-4">Scavengy</h1>
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody id="hunts-table-body">
+        @foreach (var hunt in Model)
+        {
+            <tr id="hunt-row-@Model.Id">
+                <td>@Model.Title</td>
+                <td>@Model.HuntLocation</td>
+                <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted text-center mt-3">No hunts yet — create one to get started.</p>
+    }
+</div>

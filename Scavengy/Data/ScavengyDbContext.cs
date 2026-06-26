@@ -17,6 +17,8 @@ public class ScavengyDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         
-        // TODO configure relationships, seed test data
+        modelBuilder.Entity<Hunt>()
+            .Navigation(x => x.Clues)
+            .AutoInclude();
     }
 }
