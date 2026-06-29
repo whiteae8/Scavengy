@@ -1,25 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using Scavengy.ServiceModel;
 using ServiceStack;
+using ServiceStack.Mvc;
 
 namespace Scavengy.Controllers;
 
-public class HomeController : Controller
+public class HomeController : ServiceStackController
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly IServiceGateway _gateway;
 
-    public HomeController(ILogger<HomeController> logger, IServiceGateway gateway)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _gateway = gateway;
     }
 
     public async Task<IActionResult> Index()
     {
         try
         {
-            var hunts = await _gateway.SendAsync(new QueryHunts());
+            var hunts = await Gateway.SendAsync(new QueryHunts());
             return View(hunts);
         }
         catch (Exception ex)

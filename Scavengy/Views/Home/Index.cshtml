@@ -1,3 +1,4 @@
+@model List<Scavengy.ServiceModel.Hunt>
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Home";
@@ -11,16 +12,15 @@
             <th>Title</th>
             <th>Location</th>
             <th>Created</th>
-            <th></th>
         </tr>
         </thead>
         <tbody id="hunts-table-body">
         @foreach (var hunt in Model)
         {
-            <tr id="hunt-row-@Model.Id">
-                <td>@Model.Title</td>
-                <td>@Model.HuntLocation</td>
-                <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
+            <tr id="hunt-row-@hunt.Id">
+                <td>@hunt.Title</td>
+                <td>@hunt.HuntLocation</td>
+                <td>@hunt.CreatedDate.ToString("MMM d, yyyy")</td>
             </tr>
         }
         </tbody>

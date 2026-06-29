@@ -8,11 +8,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Scavengy.ServiceModel\Scavengy.ServiceModel.csproj" />
-        <ProjectReference Include="..\Scavengy\Scavengy.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ServiceStack" Version="8.0.0" />
+        <PackageReference Include="ServiceStack" Version="10.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     </ItemGroup>
     
 </Project>

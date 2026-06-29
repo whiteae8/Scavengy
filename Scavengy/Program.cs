@@ -18,9 +18,9 @@ builder.Services.AddHttpClient(); // for Azure OpenAI / Google Places later
 builder.Services.AddDbContext<ScavengyDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-var app = builder.Build();
+builder.Services.AddServiceStack(typeof(HuntService).Assembly);
 
-app.UseServiceStack(new AppHost());
+var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -28,12 +28,15 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.UseServiceStack(new AppHost());
 
 app.Run();
 
@@ -43,5 +46,6 @@ public class AppHost : AppHostBase
 
     public override void Configure(Funq.Container container)
     {
+        container.AddScoped<ScavengyDbContext>();
     }
 }
