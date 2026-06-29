@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ServiceStack;
 
 namespace Scavengy.ServiceModel;
@@ -5,7 +6,10 @@ namespace Scavengy.ServiceModel;
 [Route("/hunts", "POST")]
 public class CreateHunt : IPost, IReturn<Hunt>
 {
+    [Required]
     public string Title { get; set; } = string.Empty;
+    [Required]
+    [Display(Name = "Hunt Location")]
     public string HuntLocation { get; set; } = string.Empty;
 }
 

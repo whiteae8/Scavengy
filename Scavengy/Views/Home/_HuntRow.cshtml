@@ -1,0 +1,9 @@
+@model Scavengy.ServiceModel.Hunt
+
+<tbody hx-swap-oob="afterbegin:#hunts-table-body">
+    <tr id="hunt-row-@Model.Id">
+        <td>@Model.Title</td>
+        <td>@Model.HuntLocation</td>
+        <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
+    </tr>
+</tbody>

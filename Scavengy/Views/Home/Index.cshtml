@@ -4,7 +4,30 @@
     ViewData["Title"] = "Home";
 }
 
-<h1 class="mb-4">Scavengy</h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Scavengy</h1>
+    <button class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#createHuntModal"
+            hx-get="/Home/CreateHuntForm"
+            hx-target="#createHuntModalContent"
+            hx-trigger="click">
+        Create Hunt
+    </button>
+</div>
+
+<div class="modal fade" id="createHuntModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Hunt</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="createHuntModalContent"></div>
+        </div>
+    </div>
+</div>
+
 <div class="table-responsive">
     <table class="table table-hover align-middle">
         <thead class="table-dark">
@@ -31,3 +54,11 @@
         <p class="text-muted text-center mt-3">No hunts yet — create one to get started.</p>
     }
 </div>
+
+@section scripts {
+    <script>
+    document.body.addEventListener('huntCreated', function () {
+        bootstrap.Modal.getInstance(document.getElementById('createHuntModal'))?.hide();
+    });
+    </script>
+}

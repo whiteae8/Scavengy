@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Scavengy.Models;
 using Scavengy.ServiceModel;
 using ServiceStack;
 using ServiceStack.Mvc;
@@ -25,6 +26,30 @@ public class HomeController : ServiceStackController
         {
             _logger.LogError(ex.Message);
             throw;
+        }
+    }
+
+    [HttpGet]
+    public IActionResult CreateHuntForm() =>
+        PartialView("_CreateHuntForm", new CreateHuntViewModel());
+
+    [HttpPost]
+    public async Task<IActionResult> CreateHunt(CreateHunt request)
+    {
+        try
+        {
+            var hunt = await Gateway.SendAsync(request);
+            Response.Headers.Append("HX-Trigger", "huntCreated");
+            return PartialView("_HuntRow", hunt);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return PartialView("_CreateHuntForm", new CreateHuntViewModel
+            {
+                Form = request,
+                Error = "Failed to create hunt. Please try again later."
+            });
         }
     }
 }
