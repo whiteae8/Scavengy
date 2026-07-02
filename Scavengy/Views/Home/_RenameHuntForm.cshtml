@@ -1,0 +1,22 @@
+@model Scavengy.Models.RenameHuntViewModel
+
+<form hx-post="/Home/RenameHunt"
+      hx-target="#renameHuntModalContent"
+      hx-swap="innerHTML"
+      hx-validate="true">
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <div class="modal-body">
+        @if (Model.Error != null)
+        {
+            <div class="alert alert-danger">@Model.Error</div>
+        }
+        <div class="mb-3">
+            <label for="RenameTitle" class="form-label">Title</label>
+            <input id="RenameTitle" name="Title" value="@Model.Title" class="form-control" required autofocus />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Rename</button>
+    </div>
+</form>

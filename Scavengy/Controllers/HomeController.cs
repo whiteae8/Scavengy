@@ -40,7 +40,7 @@ public class HomeController : ServiceStackController
         {
             var hunt = await Gateway.SendAsync(request);
             Response.Headers.Append("HX-Trigger", "huntCreated");
-            return PartialView("_HuntRow", hunt);
+            return PartialView("_HuntRow", new HuntRowViewModel { Hunt = hunt, Oob = "afterbegin:#hunts-table-body" });
         }
         catch (Exception ex)
         {
@@ -49,6 +49,34 @@ public class HomeController : ServiceStackController
             {
                 Form = request,
                 Error = "Failed to create hunt. Please try again later."
+            });
+        }
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> RenameHuntForm(int id)
+    {
+        var hunt = await Gateway.SendAsync(new GetHunt { Id = id });
+        return PartialView("_RenameHuntForm", new RenameHuntViewModel { Id = id, Title = hunt!.Title });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RenameHunt(RenameHuntViewModel request)
+    {
+        try
+        {
+            var hunt = await Gateway.SendAsync(new UpdateHunt { Id = request.Id, Title = request.Title });
+            Response.Headers.Append("HX-Trigger", "huntRenamed");
+            return PartialView("_HuntRow", new HuntRowViewModel { Hunt = hunt, Oob = $"outerHTML:#hunt-row-{hunt.Id}" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            return PartialView("_RenameHuntForm", new RenameHuntViewModel
+            {
+                Id = request.Id,
+                Title = request.Title,
+                Error = "Failed to rename hunt. Please try again later."
             });
         }
     }
