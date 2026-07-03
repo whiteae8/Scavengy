@@ -9,9 +9,8 @@
     <button class="btn btn-primary"
             data-bs-toggle="modal"
             data-bs-target="#createHuntModal"
-            hx-get="/Home/CreateHuntForm"
-            hx-target="#createHuntModalContent"
-            hx-trigger="click">
+            hx-get="@Url.Action("CreateHuntForm", "Home")"
+            hx-target="#createHuntModalContent">
         Create Hunt
     </button>
 </div>

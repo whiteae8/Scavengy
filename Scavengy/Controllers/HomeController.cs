@@ -24,7 +24,7 @@ public class HomeController : ServiceStackController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError(ex, ex.Message);
             throw;
         }
     }
@@ -44,7 +44,7 @@ public class HomeController : ServiceStackController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError(ex, ex.Message);
             return PartialView("_CreateHuntForm", new CreateHuntViewModel
             {
                 Form = request,
@@ -56,8 +56,16 @@ public class HomeController : ServiceStackController
     [HttpGet]
     public async Task<IActionResult> RenameHuntForm(int id)
     {
-        var hunt = await Gateway.SendAsync(new GetHunt { Id = id });
-        return PartialView("_RenameHuntForm", new RenameHuntViewModel { Id = id, Title = hunt!.Title });
+        try
+        {
+            var hunt = await Gateway.SendAsync(new GetHunt { Id = id });
+            return PartialView("_RenameHuntForm", new RenameHuntViewModel { Id = id, Title = hunt!.Title });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load rename form for hunt {Id}", id);
+            return StatusCode(500);
+        }
     }
 
     [HttpPost]
@@ -71,7 +79,7 @@ public class HomeController : ServiceStackController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
+            _logger.LogError(ex, ex.Message);
             return PartialView("_RenameHuntForm", new RenameHuntViewModel
             {
                 Id = request.Id,

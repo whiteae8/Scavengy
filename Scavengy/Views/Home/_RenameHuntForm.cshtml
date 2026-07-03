@@ -1,6 +1,6 @@
 @model Scavengy.Models.RenameHuntViewModel
 
-<form hx-post="/Home/RenameHunt"
+<form hx-post="@Url.Action("RenameHunt", "Home")"
       hx-target="#renameHuntModalContent"
       hx-swap="innerHTML"
       hx-validate="true">

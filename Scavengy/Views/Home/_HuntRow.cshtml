@@ -12,9 +12,8 @@
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
                     <button class="dropdown-item" type="button"
-                            hx-get="/Home/RenameHuntForm?id=@Model.Hunt.Id"
+                            hx-get="@Url.Action("RenameHuntForm", "Home", new { id = Model.Hunt.Id })"
                             hx-target="#renameHuntModalContent"
-                            hx-trigger="click"
                             data-bs-toggle="modal"
                             data-bs-target="#renameHuntModal">
                         Rename
