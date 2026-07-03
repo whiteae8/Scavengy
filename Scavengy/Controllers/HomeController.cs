@@ -40,11 +40,13 @@ public class HomeController : ServiceStackController
         {
             var hunt = await Gateway.SendAsync(request);
             Response.Headers.Append("HX-Trigger", "huntCreated");
-            return PartialView("_HuntRow", new HuntRowViewModel { Hunt = hunt, Oob = "afterbegin:#hunts-table-body" });
+            return PartialView("_HuntRow", hunt);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
+            Response.Headers.Append("HX-Retarget", "#createHuntModalContent");
+            Response.Headers.Append("HX-Reswap", "innerHTML");
             return PartialView("_CreateHuntForm", new CreateHuntViewModel
             {
                 Form = request,
@@ -68,6 +70,22 @@ public class HomeController : ServiceStackController
         }
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> DeleteHunt(int id)
+    {
+        try
+        {
+            await Gateway.SendAsync(new DeleteHunt { Id = id });
+            Response.Headers.Append("HX-Trigger-After-Swap", "huntDeleted");
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete hunt {Id}", id);
+            return StatusCode(500);
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> RenameHunt(RenameHuntViewModel request)
     {
@@ -75,11 +93,13 @@ public class HomeController : ServiceStackController
         {
             var hunt = await Gateway.SendAsync(new UpdateHunt { Id = request.Id, Title = request.Title });
             Response.Headers.Append("HX-Trigger", "huntRenamed");
-            return PartialView("_HuntRow", new HuntRowViewModel { Hunt = hunt, Oob = $"outerHTML:#hunt-row-{hunt.Id}" });
+            return PartialView("_HuntRow", hunt);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
+            Response.Headers.Append("HX-Retarget", "#renameHuntModalContent");
+            Response.Headers.Append("HX-Reswap", "innerHTML");
             return PartialView("_RenameHuntForm", new RenameHuntViewModel
             {
                 Id = request.Id,

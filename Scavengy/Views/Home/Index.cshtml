@@ -52,24 +52,27 @@
         <tbody id="hunts-table-body">
         @foreach (var hunt in Model)
         {
-            @await Html.PartialAsync("_HuntRow", new Scavengy.Models.HuntRowViewModel { Hunt = hunt })
+            @await Html.PartialAsync("_HuntRow", hunt)
         }
         </tbody>
     </table>
 
-    @if (!Model.Any())
-    {
-        <p class="text-muted text-center mt-3">No hunts yet — create one to get started.</p>
-    }
+    <p id="no-hunts" class="text-muted text-center mt-3 @(Model.Any() ? "d-none" : "")">No hunts yet — create one to get started.</p>
 </div>
 
 @section scripts {
     <script>
     document.body.addEventListener('huntCreated', function () {
         bootstrap.Modal.getInstance(document.getElementById('createHuntModal'))?.hide();
+        document.getElementById('no-hunts')?.classList.add('d-none');
     });
     document.body.addEventListener('huntRenamed', function () {
         bootstrap.Modal.getInstance(document.getElementById('renameHuntModal'))?.hide();
+    });
+    document.body.addEventListener('huntDeleted', function () {
+        if (!document.querySelector('#hunts-table-body tr')) {
+            document.getElementById('no-hunts')?.classList.remove('d-none');
+        }
     });
     </script>
 }

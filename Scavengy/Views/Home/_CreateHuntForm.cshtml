@@ -1,8 +1,8 @@
 @model Scavengy.Models.CreateHuntViewModel
 
-<form hx-post="/Home/CreateHunt"
-      hx-target="#createHuntModalContent"
-      hx-swap="innerHTML"
+<form hx-post="@Url.Action("CreateHunt", "Home")"
+      hx-target="#hunts-table-body"
+      hx-swap="afterbegin"
       hx-validate="true">
     <div class="modal-body">
         @if (Model.Error != null)

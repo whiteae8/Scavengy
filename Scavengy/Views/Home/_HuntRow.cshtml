@@ -1,8 +1,8 @@
-@model Scavengy.Models.HuntRowViewModel
-<tr id="hunt-row-@Model.Hunt.Id" @Html.Raw(Model.Oob != null ? $"hx-swap-oob=\"{Model.Oob}\"" : "")>
-    <td>@Model.Hunt.Title</td>
-    <td>@Model.Hunt.HuntLocation</td>
-    <td>@Model.Hunt.CreatedDate.ToString("MMM d, yyyy")</td>
+@model Scavengy.ServiceModel.Hunt
+<tr id="hunt-row-@Model.Id">
+    <td>@Model.Title</td>
+    <td>@Model.HuntLocation</td>
+    <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
     <td class="text-end">
         <div class="dropdown">
             <button class="btn btn-sm p-0 border-0 bg-transparent" type="button"
@@ -12,11 +12,20 @@
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
                     <button class="dropdown-item" type="button"
-                            hx-get="@Url.Action("RenameHuntForm", "Home", new { id = Model.Hunt.Id })"
+                            hx-get="@Url.Action("RenameHuntForm", "Home", new { id = Model.Id })"
                             hx-target="#renameHuntModalContent"
                             data-bs-toggle="modal"
                             data-bs-target="#renameHuntModal">
                         Rename
+                    </button>
+                </li>
+                <li>
+                    <button class="dropdown-item text-danger" type="button"
+                            hx-delete="@Url.Action("DeleteHunt", "Home", new { id = Model.Id })"
+                            hx-target="#hunt-row-@Model.Id"
+                            hx-swap="delete"
+                            hx-confirm="Delete this hunt?">
+                        Delete
                     </button>
                 </li>
             </ul>
