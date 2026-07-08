@@ -86,6 +86,22 @@ public class HomeController : ServiceStackController
         }
     }
 
+    [HttpGet]
+    public async Task<IActionResult> HuntDetails(int id)
+    {
+        try
+        {
+            var hunt = await Gateway.SendAsync(new GetHunt { Id = id });
+            if (hunt == null) return NotFound();
+            return View(hunt);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load details for hunt {Id}", id);
+            throw;
+        }
+    }
+
     [HttpPost]
     public async Task<IActionResult> RenameHunt(RenameHuntViewModel request)
     {

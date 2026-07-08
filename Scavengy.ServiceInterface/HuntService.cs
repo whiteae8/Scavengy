@@ -20,6 +20,14 @@ public class HuntService : Service
         };
         _db.Hunts.Add(hunt);
         await _db.SaveChangesAsync();
+
+        // dummy clues for testing purposes
+        _db.Clues.AddRange(
+            new Clue { HuntId = hunt.Id, ClueIndex = 1, ClueText = "Follow the path to where the sun rises first.", LocationName = "East Entrance" },
+            new Clue { HuntId = hunt.Id, ClueIndex = 2, ClueText = "Look beneath the oldest tree in the clearing.", LocationName = "Old Oak Clearing" }
+        );
+        await _db.SaveChangesAsync();
+
         return hunt;
     }
 

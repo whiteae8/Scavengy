@@ -1,6 +1,6 @@
 @model Scavengy.ServiceModel.Hunt
 <tr id="hunt-row-@Model.Id">
-    <td>@Model.Title</td>
+    <td><a href="@Url.Action("HuntDetails", "Home", new { id = Model.Id })" class="text-decoration-none">@Model.Title</a></td>
     <td>@Model.HuntLocation</td>
     <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
     <td class="text-end">
