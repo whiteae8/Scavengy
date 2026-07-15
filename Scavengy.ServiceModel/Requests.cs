@@ -36,3 +36,9 @@ public class DeleteHunt : IDelete, IReturnVoid
 {
     public int Id { get; set; }
 }
+
+[Route("/hunts/{Id}/clues", "POST")]
+public class GenerateClues : IPost, IReturn<Hunt>
+{
+    public int Id { get; set; }
+}
