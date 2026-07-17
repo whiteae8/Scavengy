@@ -46,6 +46,7 @@
             <th>Title</th>
             <th>Location</th>
             <th>Created</th>
+            <th>Clues</th>
             <th></th>
         </tr>
         </thead>
@@ -65,6 +66,9 @@
     document.body.addEventListener('huntCreated', function () {
         bootstrap.Modal.getInstance(document.getElementById('createHuntModal'))?.hide();
         document.getElementById('no-hunts')?.classList.add('d-none');
+    });
+    document.body.addEventListener('cluesFailed', function () {
+        showToast('Hunt created, but clue generation failed.', 'warning');
     });
     document.body.addEventListener('huntRenamed', function () {
         bootstrap.Modal.getInstance(document.getElementById('renameHuntModal'))?.hide();

@@ -17,29 +17,4 @@
     </div>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th style="width: 3rem">#</th>
-                <th>Clue</th>
-                <th>Location</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var clue in Model.Clues.OrderBy(c => c.ClueIndex))
-            {
-                <tr>
-                    <td class="text-muted">@clue.ClueIndex</td>
-                    <td>@clue.ClueText</td>
-                    <td>@clue.LocationName</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @if (!Model.Clues.Any())
-    {
-        <p class="text-muted text-center mt-3">No clues yet.</p>
-    }
-</div>
+@await Html.PartialAsync("_ClueTable", Model)

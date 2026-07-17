@@ -3,6 +3,7 @@
     <td><a href="@Url.Action("HuntDetails", "Home", new { id = Model.Id })" class="text-decoration-none">@Model.Title</a></td>
     <td>@Model.HuntLocation</td>
     <td>@Model.CreatedDate.ToString("MMM d, yyyy")</td>
+    <td class="@(Model.Clues.Any() ? "" : "text-warning")">@Model.Clues.Count</td>
     <td class="text-end">
         <div class="dropdown">
             <button class="btn btn-sm p-0 border-0 bg-transparent" type="button"

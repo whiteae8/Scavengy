@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Scavengy.Models;
 using Scavengy.ServiceModel;
@@ -39,7 +40,15 @@ public class HomeController : ServiceStackController
         try
         {
             var hunt = await Gateway.SendAsync(request);
-            Response.Headers.Append("HX-Trigger", "huntCreated");
+            if (hunt.Clues.Count == 0)
+            {
+                var trigger = JsonSerializer.Serialize(new { huntCreated = true, cluesFailed = true });
+                Response.Headers.Append("HX-Trigger", trigger);
+            }
+            else
+            {
+                Response.Headers.Append("HX-Trigger", "huntCreated");
+            }
             return PartialView("_HuntRow", hunt);
         }
         catch (Exception ex)
@@ -99,6 +108,21 @@ public class HomeController : ServiceStackController
         {
             _logger.LogError(ex, "Failed to load details for hunt {Id}", id);
             throw;
+        }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GenerateClues(int id)
+    {
+        try
+        {
+            var hunt = await Gateway.SendAsync(new GenerateClues { Id = id });
+            return PartialView("_ClueTable", hunt);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate clues for hunt {Id}", id);
+            return StatusCode(500);
         }
     }
 

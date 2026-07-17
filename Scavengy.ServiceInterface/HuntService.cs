@@ -93,19 +93,13 @@ public class HuntService : Service
         var hunt = await _db.Hunts.FindAsync(request.Id);
         if (hunt == null) throw HttpError.NotFound("Hunt not found");
 
-        // Empty-guard: only generate when the hunt has no clues yet, so retrying
-        // (or spamming) this endpoint against an already-populated hunt is a no-op.
-        // Future: ask for a confirmation to clear and re-generate clues.
-        if (hunt.Clues.Count == 0)
-        {
-            var clues = GenerateClues(hunt.HuntLocation);
-            if (clues.Count > 0)
-            {
-                foreach (var clue in clues) clue.HuntId = hunt.Id;
-                _db.Clues.AddRange(clues);
-                await _db.SaveChangesAsync();
-            }
-        }
+        if (hunt.Clues.Count != 0) return hunt;
+        var clues = GenerateClues(hunt.HuntLocation);
+        if (clues.Count == 0) throw new Exception("Clue generation failed to produce any clues");
+
+        foreach (var clue in clues) clue.HuntId = hunt.Id;
+        _db.Clues.AddRange(clues);
+        await _db.SaveChangesAsync();
 
         return hunt;
     }

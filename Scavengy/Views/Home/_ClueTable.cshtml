@@ -1,0 +1,40 @@
+@model Scavengy.ServiceModel.Hunt
+
+<div id="clue-table-@Model.Id">
+    @if (Model.Clues.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 3rem">#</th>
+                        <th>Clue</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var clue in Model.Clues.OrderBy(c => c.ClueIndex))
+                    {
+                        <tr>
+                            <td class="text-muted">@clue.ClueIndex</td>
+                            <td>@clue.ClueText</td>
+                            <td>@clue.LocationName</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted mt-3">
+            <p class="mb-2">No clues yet — generate them with AI, or add clues manually (coming soon).</p>
+            <button class="btn btn-outline-primary btn-sm"
+                    hx-post="@Url.Action("GenerateClues", "Home", new { id = Model.Id })"
+                    hx-target="#clue-table-@Model.Id"
+                    hx-swap="outerHTML">
+                Generate clues
+            </button>
+        </div>
+    }
+</div>
