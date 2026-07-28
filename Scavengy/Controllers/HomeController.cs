@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Scavengy.Models;
 using Scavengy.ServiceModel;
-using Scavengy.Integrations;
+using Scavengy.ServiceInterface.Integrations;
 using ServiceStack;
 using ServiceStack.Mvc;
 

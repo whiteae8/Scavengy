@@ -3,7 +3,7 @@ using Azure.AI.OpenAI;
 using Microsoft.EntityFrameworkCore;
 using Scavengy.Data;
 using Scavengy.ServiceInterface;
-using Scavengy.Integrations;
+using Scavengy.ServiceInterface.Integrations;
 using ServiceStack;
 
 var builder = WebApplication.CreateBuilder(args);

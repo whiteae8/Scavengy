@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
 using Scavengy.Data;
+using Scavengy.ServiceInterface.Integrations;
 using Scavengy.ServiceModel;
 using ServiceStack;
 
@@ -38,14 +39,16 @@ public class HuntService : Service
     private readonly ScavengyDbContext _db;
     private readonly ILogger<HuntService> _logger;
     private readonly ChatClient _chatClient;
+    private readonly IPlacesService _places;
     private readonly string _clueGenerationMode;
     private readonly int _clueCount;
 
-    public HuntService(ScavengyDbContext db, IConfiguration config, ILogger<HuntService> logger, ChatClient chatClient)
+    public HuntService(ScavengyDbContext db, IConfiguration config, ILogger<HuntService> logger, ChatClient chatClient, IPlacesService places)
     {
         _db = db;
         _logger = logger;
         _chatClient = chatClient;
+        _places = places;
         _clueGenerationMode = config["AiClueGeneration:Mode"] ?? "none";
         _clueCount = config.GetValue("AiClueGeneration:ClueCount", 4);
     }
@@ -62,10 +65,9 @@ public class HuntService : Service
         await _db.SaveChangesAsync();
 
         // Hunt creation always succeeds regardless of clue generation outcome.
-        var clues = await GenerateClues(hunt.HuntLocation);
+        var clues = await GenerateClues(hunt.HuntLocation, hunt.Id);
         if (clues.Count <= 0) return hunt;
-        
-        foreach (var clue in clues) clue.HuntId = hunt.Id;
+
         _db.Clues.AddRange(clues);
         await _db.SaveChangesAsync();
 
@@ -112,17 +114,16 @@ public class HuntService : Service
         if (hunt == null) throw HttpError.NotFound("Hunt not found");
 
         if (hunt.Clues.Count != 0) return hunt;
-        var clues = await GenerateClues(hunt.HuntLocation);
+        var clues = await GenerateClues(hunt.HuntLocation, hunt.Id);
         if (clues.Count == 0) throw new Exception("Clue generation failed to produce any clues");
 
-        foreach (var clue in clues) clue.HuntId = hunt.Id;
         _db.Clues.AddRange(clues);
         await _db.SaveChangesAsync();
 
         return hunt;
     }
 
-    private async Task<List<Clue>> GenerateClues(string huntLocation)
+    private async Task<List<Clue>> GenerateClues(string huntLocation, int huntId)
     {
         if (_clueGenerationMode != "azure") return [];
 
@@ -172,8 +173,24 @@ public class HuntService : Service
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             var clues = parsed!.Clues;
-            for (var i = 0; i < clues.Count; i++) clues[i].ClueIndex = i + 1;
-            return clues;
+            var geocodedClues = new List<Clue>();
+            foreach (var clue in clues)
+            {
+                var place = await _places.FindPlaceAsync($"{clue.LocationName}, {huntLocation}", CancellationToken.None);
+                if (place is null)
+                {
+                    _logger.LogWarning("No Places match for {LocationName}; dropping clue", clue.LocationName);
+                    continue;
+                }
+                clue.HuntId = huntId;
+                clue.LocationAddress = place.Address;
+                clue.Latitude = place.Latitude;
+                clue.Longitude = place.Longitude;
+                clue.ClueIndex = geocodedClues.Count + 1;
+                geocodedClues.Add(clue);
+            }
+
+            return geocodedClues;
         }
         catch (Exception ex)
         {
