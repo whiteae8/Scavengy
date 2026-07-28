@@ -31,7 +31,10 @@ public class GooglePlacesService : IPlacesService
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, "places:autocomplete");
+            // "places:autocomplete" alone would parse as an absolute URI with scheme "places"
+            // (Google's colon-suffixed method names collide with URI scheme grammar), so the
+            // leading "./" forces relative-reference parsing and merges against BaseAddress.
+            using var request = new HttpRequestMessage(HttpMethod.Post, "./places:autocomplete");
             request.Headers.Add("X-Goog-Api-Key", apiKey);
             request.Content = JsonContent.Create(new { input, includedPrimaryTypes = new[] { "locality" } });
 
