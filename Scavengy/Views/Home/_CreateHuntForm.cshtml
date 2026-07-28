@@ -31,11 +31,9 @@
 </form>
 
 <script>
-    function initHuntLocationTomSelect() {
-        const select = document.getElementById('HuntLocation');
-        if (!select || select.tomselect) return;
-
-        new TomSelect(select, {
+    const huntLocationSelect = document.getElementById('HuntLocation');
+    if (huntLocationSelect && !huntLocationSelect.tomselect) {
+        new TomSelect(huntLocationSelect, {
             create: false,
             load: function (query, callback) {
                 if (!query.length) return callback();
@@ -46,6 +44,4 @@
             }
         });
     }
-
-    initHuntLocationTomSelect();
 </script>
