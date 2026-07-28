@@ -7,7 +7,6 @@ namespace Scavengy.ServiceInterface.Integrations;
 
 public interface IPlacesService
 {
-    Task<List<string>> SearchCitiesAsync(string input, CancellationToken ct);
     Task<PlaceLocation?> FindPlaceAsync(string query, CancellationToken ct);
 }
 
@@ -26,31 +25,6 @@ public class GooglePlacesService : IPlacesService
         _http = http;
         _logger = logger;
         _apiKey = config["GooglePlaces:ApiKey"] ?? throw new InvalidOperationException("GooglePlaces:ApiKey not configured");
-    }
-
-    public async Task<List<string>> SearchCitiesAsync(string input, CancellationToken ct)
-    {
-        try
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Post, "./places:autocomplete");
-            request.Headers.Add("X-Goog-Api-Key", _apiKey);
-            request.Content = JsonContent.Create(new { input, includedPrimaryTypes = new[] { "locality" } });
-
-            using var response = await _http.SendAsync(request, ct);
-            response.EnsureSuccessStatusCode();
-
-            var payload = await response.Content.ReadFromJsonAsync<AutocompleteResponse>(JsonOptions, ct);
-
-            return payload?.Suggestions?
-                .Where(s => s.PlacePrediction is not null)
-                .Select(s => s.PlacePrediction!.Text.Text)
-                .ToList() ?? [];
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Google Places autocomplete failed for {Input}", input);
-            return [];
-        }
     }
 
     public async Task<PlaceLocation?> FindPlaceAsync(string query, CancellationToken ct)
@@ -78,11 +52,6 @@ public class GooglePlacesService : IPlacesService
             return null;
         }
     }
-
-    private record AutocompleteResponse(List<Suggestion>? Suggestions);
-    private record Suggestion(PlacePrediction? PlacePrediction);
-    private record PlacePrediction(TextValue Text);
-    private record TextValue(string Text);
 
     private record SearchTextResponse(List<Place>? Places);
     private record Place(string? FormattedAddress, LatLng? Location);

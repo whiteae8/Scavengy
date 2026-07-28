@@ -2,7 +2,6 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Scavengy.Models;
 using Scavengy.ServiceModel;
-using Scavengy.ServiceInterface.Integrations;
 using ServiceStack;
 using ServiceStack.Mvc;
 
@@ -11,12 +10,10 @@ namespace Scavengy.Controllers;
 public class HomeController : ServiceStackController
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly IPlacesService _places;
 
-    public HomeController(ILogger<HomeController> logger, IPlacesService places)
+    public HomeController(ILogger<HomeController> logger)
     {
         _logger = logger;
-        _places = places;
     }
 
     public async Task<IActionResult> Index()
@@ -37,19 +34,20 @@ public class HomeController : ServiceStackController
     public IActionResult CreateHuntForm() =>
         PartialView("_CreateHuntForm", new CreateHuntViewModel());
 
-    [HttpGet]
-    public async Task<IActionResult> LocationSuggestions(string? query, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(query) || query.Trim().Length < 2)
-            return Json(Array.Empty<object>());
-
-        var suggestions = await _places.SearchCitiesAsync(query.Trim(), ct);
-        return Json(suggestions.Select(s => new { value = s, text = s }));
-    }
-
     [HttpPost]
     public async Task<IActionResult> CreateHunt(CreateHunt request)
     {
+        if (string.IsNullOrWhiteSpace(request.HuntLocation))
+        {
+            Response.Headers.Append("HX-Retarget", "#createHuntModalContent");
+            Response.Headers.Append("HX-Reswap", "innerHTML");
+            return PartialView("_CreateHuntForm", new CreateHuntViewModel
+            {
+                Form = request,
+                Error = "Please select a location from the suggestions list."
+            });
+        }
+
         try
         {
             var hunt = await Gateway.SendAsync(request);

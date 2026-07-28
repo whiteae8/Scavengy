@@ -15,13 +15,16 @@
             <input id="Title" name="Title" value="@Model.Form.Title" class="form-control" required />
         </div>
         <div class="mb-3">
-            <label for="HuntLocation" class="form-label">Hunt Location</label>
-            <select id="HuntLocation" name="HuntLocation" class="form-select" required>
-                @if (!string.IsNullOrEmpty(Model.Form.HuntLocation))
-                {
-                    <option value="@Model.Form.HuntLocation" selected>@Model.Form.HuntLocation</option>
-                }
-            </select>
+            <label for="city-picker" class="form-label">Hunt Location</label>
+
+            <gmpx-place-picker id="city-picker"
+                               type="(cities)"
+                               placeholder="Search a city…"
+                               class="form-control p-0 border-0"
+                               style="display:block; width:100%;"></gmpx-place-picker>
+
+            <input type="hidden" id="HuntLocation" name="HuntLocation"
+                   value="@Model.Form.HuntLocation" />
         </div>
     </div>
     <div class="modal-footer">
@@ -31,17 +34,18 @@
 </form>
 
 <script>
-    const huntLocationSelect = document.getElementById('HuntLocation');
-    if (huntLocationSelect && !huntLocationSelect.tomselect) {
-        new TomSelect(huntLocationSelect, {
-            create: false,
-            load: function (query, callback) {
-                if (!query.length) return callback();
-                fetch(`/Home/LocationSuggestions?query=${encodeURIComponent(query)}`)
-                    .then(r => r.json())
-                    .then(data => callback(data))
-                    .catch(() => callback());
-            }
+    (function () {
+        const form = document.getElementById('createHuntForm');
+        const picker = document.getElementById('city-picker');
+        const hidden = document.getElementById('HuntLocation');
+        const errorAlert = form.querySelector('.alert-danger');
+
+        picker.addEventListener('gmpx-placechange', () => {
+            const place = picker.value;
+            hidden.value = place?.formattedAddress ?? place?.displayName ?? '';
+            errorAlert?.remove();
         });
-    }
+
+        form.addEventListener('htmx:beforeRequest', () => errorAlert?.remove());
+    })();
 </script>
