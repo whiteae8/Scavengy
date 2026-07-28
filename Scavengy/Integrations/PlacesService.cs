@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Scavengy.Services;
+namespace Scavengy.Integrations;
 
 public interface IPlacesService
 {
@@ -10,32 +10,22 @@ public interface IPlacesService
 public class GooglePlacesService : IPlacesService
 {
     private readonly HttpClient _http;
-    private readonly IConfiguration _config;
     private readonly ILogger<GooglePlacesService> _logger;
+    private readonly string _apiKey;
 
     public GooglePlacesService(HttpClient http, IConfiguration config, ILogger<GooglePlacesService> logger)
     {
         _http = http;
-        _config = config;
         _logger = logger;
+        _apiKey = config["GooglePlaces:ApiKey"] ?? throw new InvalidOperationException("GooglePlaces:ApiKey not configured");
     }
 
     public async Task<List<string>> SearchCitiesAsync(string input, CancellationToken ct)
     {
-        var apiKey = _config["GooglePlaces:ApiKey"];
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            _logger.LogWarning("GooglePlaces:ApiKey not configured; returning no suggestions");
-            return [];
-        }
-
         try
         {
-            // "places:autocomplete" alone would parse as an absolute URI with scheme "places"
-            // (Google's colon-suffixed method names collide with URI scheme grammar), so the
-            // leading "./" forces relative-reference parsing and merges against BaseAddress.
             using var request = new HttpRequestMessage(HttpMethod.Post, "./places:autocomplete");
-            request.Headers.Add("X-Goog-Api-Key", apiKey);
+            request.Headers.Add("X-Goog-Api-Key", _apiKey);
             request.Content = JsonContent.Create(new { input, includedPrimaryTypes = new[] { "locality" } });
 
             using var response = await _http.SendAsync(request, ct);

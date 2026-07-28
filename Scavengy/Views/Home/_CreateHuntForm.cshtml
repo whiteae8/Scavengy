@@ -29,3 +29,17 @@
         <button type="submit" class="btn btn-primary">Create</button>
     </div>
 </form>
+
+<script>
+    document.getElementById('HuntLocation').tomselect?.destroy();
+    new TomSelect('#HuntLocation', {
+        create: false,
+        load: function (query, callback) {
+            if (!query.length) return callback();
+            fetch(`/Home/LocationSuggestions?query=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(data => callback(data))
+                .catch(() => callback());
+        }
+    });
+</script>
