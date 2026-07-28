@@ -31,15 +31,21 @@
 </form>
 
 <script>
-    document.getElementById('HuntLocation').tomselect?.destroy();
-    new TomSelect('#HuntLocation', {
-        create: false,
-        load: function (query, callback) {
-            if (!query.length) return callback();
-            fetch(`/Home/LocationSuggestions?query=${encodeURIComponent(query)}`)
-                .then(r => r.json())
-                .then(data => callback(data))
-                .catch(() => callback());
-        }
-    });
+    function initHuntLocationTomSelect() {
+        const select = document.getElementById('HuntLocation');
+        if (!select || select.tomselect) return;
+
+        new TomSelect(select, {
+            create: false,
+            load: function (query, callback) {
+                if (!query.length) return callback();
+                fetch(`/Home/LocationSuggestions?query=${encodeURIComponent(query)}`)
+                    .then(r => r.json())
+                    .then(data => callback(data))
+                    .catch(() => callback());
+            }
+        });
+    }
+
+    initHuntLocationTomSelect();
 </script>
