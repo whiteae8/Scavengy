@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Azure.AI.OpenAI;
+using Microsoft.EntityFrameworkCore;
 using Scavengy.Data;
 using Scavengy.ServiceInterface;
 using ServiceStack;
@@ -14,6 +16,17 @@ if (!string.IsNullOrEmpty(licenseKey))
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient(); // for Azure OpenAI / Google Places later
+
+builder.Services.AddSingleton(sp =>
+{
+    var cfg = builder.Configuration.GetSection("AzureOpenAI");
+    var endpoint = cfg["Endpoint"] ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not configured");
+    var apiKey   = cfg["ApiKey"]   ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not configured");
+    var deployment = cfg["DeploymentName"] ?? throw new InvalidOperationException("AzureOpenAI:DeploymentName not configured");
+
+    return new AzureOpenAIClient(new Uri(endpoint), new AzureKeyCredential(apiKey))
+        .GetChatClient(deployment);
+});
 
 builder.Services.AddDbContext<ScavengyDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
