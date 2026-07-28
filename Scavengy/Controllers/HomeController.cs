@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Scavengy.Models;
 using Scavengy.ServiceModel;
+using Scavengy.Services;
 using ServiceStack;
 using ServiceStack.Mvc;
 
@@ -10,10 +11,12 @@ namespace Scavengy.Controllers;
 public class HomeController : ServiceStackController
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IPlacesService _places;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IPlacesService places)
     {
         _logger = logger;
+        _places = places;
     }
 
     public async Task<IActionResult> Index()
@@ -33,6 +36,16 @@ public class HomeController : ServiceStackController
     [HttpGet]
     public IActionResult CreateHuntForm() =>
         PartialView("_CreateHuntForm", new CreateHuntViewModel());
+
+    [HttpGet]
+    public async Task<IActionResult> LocationSuggestions(string? query, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Trim().Length < 2)
+            return Json(Array.Empty<object>());
+
+        var suggestions = await _places.SearchCitiesAsync(query.Trim(), ct);
+        return Json(suggestions.Select(s => new { value = s, text = s }));
+    }
 
     [HttpPost]
     public async Task<IActionResult> CreateHunt(CreateHunt request)

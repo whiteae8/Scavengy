@@ -1,6 +1,7 @@
 @model Scavengy.Models.CreateHuntViewModel
 
-<form hx-post="@Url.Action("CreateHunt", "Home")"
+<form id="createHuntForm"
+      hx-post="@Url.Action("CreateHunt", "Home")"
       hx-target="#hunts-table-body"
       hx-swap="afterbegin"
       hx-validate="true">
@@ -15,7 +16,12 @@
         </div>
         <div class="mb-3">
             <label for="HuntLocation" class="form-label">Hunt Location</label>
-            <input id="HuntLocation" name="HuntLocation" value="@Model.Form.HuntLocation" class="form-control" required />
+            <select id="HuntLocation" name="HuntLocation" class="form-select" required>
+                @if (!string.IsNullOrEmpty(Model.Form.HuntLocation))
+                {
+                    <option value="@Model.Form.HuntLocation" selected>@Model.Form.HuntLocation</option>
+                }
+            </select>
         </div>
     </div>
     <div class="modal-footer">
