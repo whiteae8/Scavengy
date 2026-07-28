@@ -3,6 +3,7 @@ using Azure.AI.OpenAI;
 using Microsoft.EntityFrameworkCore;
 using Scavengy.Data;
 using Scavengy.ServiceInterface;
+using Scavengy.Integrations;
 using ServiceStack;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,10 @@ if (!string.IsNullOrEmpty(licenseKey))
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddHttpClient(); // for Azure OpenAI / Google Places later
+builder.Services.AddHttpClient<IPlacesService, GooglePlacesService>(client =>
+{
+    client.BaseAddress = new Uri("https://places.googleapis.com/v1/");
+});
 
 builder.Services.AddSingleton(sp =>
 {

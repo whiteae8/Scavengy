@@ -128,8 +128,6 @@ public class HuntService : Service
 
         try
         {
-            // TODO: hardcoded to Nashville, TN while the AI prompt itself is being
-            // tested — swap back to `huntLocation` once that's confirmed working.
             var messages = new List<ChatMessage>
             {
                 new SystemChatMessage(
@@ -160,7 +158,7 @@ public class HuntService : Service
                     - locationName: the landmark's common name.
                     """),
                 new UserChatMessage(
-                    $"Create exactly {_clueCount} clues for a scavenger hunt in Nashville, TN.")
+                    $"Create exactly {_clueCount} clues for a scavenger hunt in {huntLocation}.")
             };
 
             var options = new ChatCompletionOptions
