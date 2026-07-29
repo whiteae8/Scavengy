@@ -4,6 +4,13 @@ An AI-powered scavenger hunt builder. Pick a real city, and Scavengy generates a
 
 Built as a full-stack .NET application with a layered, message-based architecture: ASP.NET Core MVC + htmx on the front, ServiceStack services over EF Core behind it, and third-party integrations (Azure OpenAI, Google Places) isolated behind typed clients.
 
+<p align="center">
+  <img width="85%" alt="Hunt details page: AI-generated riddle clues plotted as numbered pins on an interactive map"
+       src="https://github.com/user-attachments/assets/44b536d5-373f-432e-9267-2ec543d1b26e" />
+  <br/>
+  <em>A generated hunt: each clue verified against Google Places and plotted with numbered markers.</em>
+</p>
+
 ## Features
 
 - **Create hunts** for any real city — the location field uses Google's Place Picker component (cities only), and the server independently rejects submissions without a selected place
@@ -126,4 +133,3 @@ DatabaseScripts/             T-SQL schema documentation
 
 - Player-facing hunt experience (currently builder-focused)
 - Automated test coverage for the service layer
-```
