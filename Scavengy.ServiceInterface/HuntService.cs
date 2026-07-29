@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
 using Scavengy.Data;
-using Scavengy.ServiceInterface.Integrations;
 using Scavengy.ServiceModel;
 using ServiceStack;
 
@@ -12,6 +11,8 @@ namespace Scavengy.ServiceInterface;
 
 public class HuntService : Service
 {
+    private const double MaxLandmarkDistanceMiles = 10;
+
     private const string ClueListSchemaJson = """
         {
             "type": "object",
@@ -142,6 +143,13 @@ public class HuntService : Service
                       Never invent places, names, or addresses. If unsure a place exists, pick
                       a different, more famous one.
                     - Prefer iconic, widely-recognized landmarks, close to downtown or main tourist district.
+                    - If the requested location is too small to have enough well-known standalone
+                      landmarks, you may pull from the immediately surrounding area, but ONLY within
+                      about a 15-minute drive (roughly 10 miles) of the requested location. Never
+                      reach into a different city's downtown or anywhere requiring a long drive.
+                    - clueText and locationName must contain ONLY actual clue and landmark content.
+                      Never ask a question, request clarification, or comment on the task itself in
+                      these fields — always produce your best clues using your own judgment instead.
                     - Each clueText is a short riddle (1-2 sentences) that hints at the landmark
                       through its history, appearance, or reputation. 
                     - The clueText must NOT contain any word from the landmark's name, nor the
@@ -172,16 +180,27 @@ public class HuntService : Service
             var parsed = JsonSerializer.Deserialize<ClueListDto>(completion.Value.Content[0].Text,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
+            var huntPlace = await _places.FindPlaceAsync(huntLocation, huntLocation, CancellationToken.None);
+
             var clues = parsed!.Clues;
             var geocodedClues = new List<Clue>();
             foreach (var clue in clues)
             {
-                var place = await _places.FindPlaceAsync($"{clue.LocationName}, {huntLocation}", CancellationToken.None);
+                var place = await _places.FindPlaceAsync($"{clue.LocationName}, {huntLocation}", huntLocation, CancellationToken.None);
                 if (place is null)
                 {
                     _logger.LogWarning("No Places match for {LocationName}; dropping clue", clue.LocationName);
                     continue;
                 }
+
+                if (huntPlace is not null &&
+                    DistanceMiles(huntPlace.Latitude, huntPlace.Longitude, place.Latitude, place.Longitude) > MaxLandmarkDistanceMiles)
+                {
+                    _logger.LogWarning("{LocationName} is more than {MaxMiles} miles from {HuntLocation}; dropping clue",
+                        clue.LocationName, MaxLandmarkDistanceMiles, huntLocation);
+                    continue;
+                }
+
                 clue.HuntId = huntId;
                 clue.LocationAddress = place.Address;
                 clue.Latitude = place.Latitude;
@@ -197,5 +216,17 @@ public class HuntService : Service
             _logger.LogError(ex, "Azure OpenAI clue generation failed for {HuntLocation}", huntLocation);
             return [];
         }
+    }
+
+    private static double DistanceMiles(double lat1, double lng1, double lat2, double lng2)
+    {
+        const double earthRadiusMiles = 3958.8;
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLng = (lng2 - lng1) * Math.PI / 180;
+        var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                Math.Cos(lat1 * Math.PI / 180) * Math.Cos(lat2 * Math.PI / 180) *
+                Math.Sin(dLng / 2) * Math.Sin(dLng / 2);
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+        return earthRadiusMiles * c;
     }
 }

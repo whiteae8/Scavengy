@@ -2,8 +2,7 @@
 
 @{
     var geocodedClues = Model.Clues
-        .Where(c => c.Latitude.HasValue && c.Longitude.HasValue)
-        .OrderBy(c => c.ClueIndex)
+        .Where(c => c is { Latitude: not null, Longitude: not null })
         .Select(c => new
         {
             index = c.ClueIndex,
@@ -20,66 +19,59 @@
     <div id="clue-map" class="rounded border mb-4" style="height: 400px; width: 100%;"></div>
 
     <script>
-        (function () {
+        (async function () {
             const clues = @Json.Serialize(geocodedClues);
 
-            async function waitForMapsApi() {
-                for (let i = 0; i < 100; i++) {
-                    if (window.google?.maps?.importLibrary) return true;
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                return false;
+            for (let i = 0; i < 100 && !window.google?.maps?.importLibrary; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
+            if (!window.google?.maps?.importLibrary) return;
 
-            async function initMap() {
-                if (!await waitForMapsApi()) return;
+            const { Map, InfoWindow } = await google.maps.importLibrary('maps');
+            const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
 
-                const { Map, InfoWindow } = await google.maps.importLibrary('maps');
-                const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+            const map = new Map(document.getElementById('clue-map'), {
+                mapId: 'DEMO_MAP_ID',
+                center: { lat: clues[0].lat, lng: clues[0].lng },
+                zoom: 14
+            });
 
-                const map = new Map(document.getElementById('clue-map'), {
-                    mapId: 'DEMO_MAP_ID',
-                    center: { lat: clues[0].lat, lng: clues[0].lng },
-                    zoom: 14
+            const infoWindow = new InfoWindow();
+            const bounds = new google.maps.LatLngBounds();
+
+            for (const clue of clues) {
+                const pin = new PinElement({ glyph: String(clue.index), glyphColor: 'white' });
+                const position = { lat: clue.lat, lng: clue.lng };
+                const marker = new AdvancedMarkerElement({
+                    map,
+                    position,
+                    content: pin.element,
+                    title: clue.name,
+                    gmpClickable: true
+                });
+                
+                marker.addEventListener('gmp-click', () => {
+                    const header = document.createElement('strong');
+                    header.style.fontSize = '1rem';
+                    header.textContent = `${clue.index}. ${clue.name}`;
+
+                    const body = document.createElement('div');
+                    if (clue.address) {
+                        body.className = 'text-muted small';
+                        body.textContent = clue.address;
+                    }
+
+                    infoWindow.setOptions({ headerContent: header });
+                    infoWindow.setContent(body);
+                    infoWindow.open({ map, anchor: marker });
                 });
 
-                const infoWindow = new InfoWindow();
-                const bounds = new google.maps.LatLngBounds();
-
-                for (const clue of clues) {
-                    const pin = new PinElement({ glyph: String(clue.index), glyphColor: 'white' });
-                    const position = { lat: clue.lat, lng: clue.lng };
-                    const marker = new AdvancedMarkerElement({
-                        map,
-                        position,
-                        content: pin.element,
-                        title: clue.name
-                    });
-
-                    marker.addListener('click', () => {
-                        const content = document.createElement('div');
-                        const title = document.createElement('strong');
-                        title.textContent = `${clue.index}. ${clue.name}`;
-                        content.appendChild(title);
-                        if (clue.address) {
-                            const address = document.createElement('div');
-                            address.className = 'text-muted small';
-                            address.textContent = clue.address;
-                            content.appendChild(address);
-                        }
-                        infoWindow.setContent(content);
-                        infoWindow.open({ map, anchor: marker });
-                    });
-
-                    bounds.extend(position);
-                }
-
-                if (clues.length > 1) {
-                    map.fitBounds(bounds, 48);
-                }
+                bounds.extend(position);
             }
 
-            initMap();
+            if (clues.length > 1) {
+                map.fitBounds(bounds, 48);
+            }
         })();
     </script>
 }

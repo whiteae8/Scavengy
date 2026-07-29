@@ -3,11 +3,11 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Scavengy.ServiceInterface.Integrations;
+namespace Scavengy.ServiceInterface;
 
 public interface IPlacesService
 {
-    Task<PlaceLocation?> FindPlaceAsync(string query, CancellationToken ct);
+    Task<PlaceLocation?> FindPlaceAsync(string query, string expectedLocation, CancellationToken ct);
 }
 
 public record PlaceLocation(string Address, double Latitude, double Longitude);
@@ -27,7 +27,7 @@ public class GooglePlacesService : IPlacesService
         _apiKey = config["GooglePlaces:ApiKey"] ?? throw new InvalidOperationException("GooglePlaces:ApiKey not configured");
     }
 
-    public async Task<PlaceLocation?> FindPlaceAsync(string query, CancellationToken ct)
+    public async Task<PlaceLocation?> FindPlaceAsync(string query, string expectedLocation, CancellationToken ct)
     {
         try
         {
@@ -41,16 +41,29 @@ public class GooglePlacesService : IPlacesService
 
             var payload = await response.Content.ReadFromJsonAsync<SearchTextResponse>(JsonOptions, ct);
             var place = payload?.Places?.FirstOrDefault();
-            return place?.Location is null 
-                ? null 
-                : new PlaceLocation(place.FormattedAddress 
-                                    ?? "", place.Location.Latitude, place.Location.Longitude);
+            if (place?.Location is null || place.FormattedAddress is null) return null;
+
+            if (!MatchesExpectedLocation(place.FormattedAddress, expectedLocation))
+            {
+                _logger.LogWarning(
+                    "Places result {Address} did not match expected location {ExpectedLocation} for query {Query}",
+                    place.FormattedAddress, expectedLocation, query);
+                return null;
+            }
+
+            return new PlaceLocation(place.FormattedAddress, place.Location.Latitude, place.Location.Longitude);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Google Places text search failed for {Query}", query);
             return null;
         }
+    }
+
+    private static bool MatchesExpectedLocation(string address, string expectedLocation)
+    {
+        var parts = expectedLocation.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        return parts.Skip(1).All(part => address.Contains(part, StringComparison.OrdinalIgnoreCase));
     }
 
     private record SearchTextResponse(List<Place>? Places);
