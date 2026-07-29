@@ -1,0 +1,77 @@
+@model Scavengy.ServiceModel.Hunt
+
+@{
+    var geocodedClues = Model.Clues
+        .Where(c => c is { Latitude: not null, Longitude: not null })
+        .Select(c => new
+        {
+            index = c.ClueIndex,
+            lat = c.Latitude!.Value,
+            lng = c.Longitude!.Value,
+            name = c.LocationName,
+            address = c.LocationAddress
+        })
+        .ToList();
+}
+
+@if (geocodedClues.Any())
+{
+    <div id="clue-map" class="rounded border mb-4" style="height: 400px; width: 100%;"></div>
+
+    <script>
+        (async function () {
+            const clues = @Json.Serialize(geocodedClues);
+
+            for (let i = 0; i < 100 && !window.google?.maps?.importLibrary; i++) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            if (!window.google?.maps?.importLibrary) return;
+
+            const { Map, InfoWindow } = await google.maps.importLibrary('maps');
+            const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+
+            const map = new Map(document.getElementById('clue-map'), {
+                mapId: 'DEMO_MAP_ID',
+                center: { lat: clues[0].lat, lng: clues[0].lng },
+                zoom: 14
+            });
+
+            const infoWindow = new InfoWindow();
+            const bounds = new google.maps.LatLngBounds();
+
+            for (const clue of clues) {
+                const pin = new PinElement({ glyph: String(clue.index), glyphColor: 'white' });
+                const position = { lat: clue.lat, lng: clue.lng };
+                const marker = new AdvancedMarkerElement({
+                    map,
+                    position,
+                    content: pin.element,
+                    title: clue.name,
+                    gmpClickable: true
+                });
+                
+                marker.addEventListener('gmp-click', () => {
+                    const header = document.createElement('strong');
+                    header.style.fontSize = '1rem';
+                    header.textContent = `${clue.index}. ${clue.name}`;
+
+                    const body = document.createElement('div');
+                    if (clue.address) {
+                        body.className = 'text-muted small';
+                        body.textContent = clue.address;
+                    }
+
+                    infoWindow.setOptions({ headerContent: header });
+                    infoWindow.setContent(body);
+                    infoWindow.open({ map, anchor: marker });
+                });
+
+                bounds.extend(position);
+            }
+
+            if (clues.length > 1) {
+                map.fitBounds(bounds, 48);
+            }
+        })();
+    </script>
+}
