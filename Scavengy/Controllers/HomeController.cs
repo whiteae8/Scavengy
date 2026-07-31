@@ -128,7 +128,7 @@ public class HomeController : ServiceStackController
         try
         {
             var hunt = await Gateway.SendAsync(new GenerateClues { Id = id });
-            return PartialView("_ClueTable", hunt);
+            return PartialView("_ClueDetails", hunt);
         }
         catch (Exception ex)
         {
